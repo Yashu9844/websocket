@@ -3,32 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>chat app</title>
+    <title>Chat App</title>
 </head>
 <body>
-    <h1>Hello This is an chat app</h1>
-  <input type="text" placeholder="enter the message" id="mes">
-  <button id="btn" >send</button>
+    <h1>Hello, This is a chat app</h1>
+    <input type="text" placeholder="Enter the message" id="mes">
+    <button id="btn">Send</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-       const messsge = document.getElementById('mes');
-       const button = document.getElementById('btn');
-        
-     socket.on('message', message=>{
-  
-         const p = document.createElement('p');
-         p.textContent = message;
-         document.body.append(p);
-       });
-  
+        const messageInput = document.getElementById('mes');
+        const button = document.getElementById('btn');
 
-       button.addEventListener('click',(e)=>{
-        const messsage2 = messsge.value 
-           socket.emit('user-message', messsage2);
-       })
+        // Receive messages from other clients and display them
+        socket.on('message', (message) => {
+            const p = document.createElement('p');
+            p.textContent = message;
+            document.body.appendChild(p);
+        });
 
+        // Send the message to the server when the button is clicked
+        button.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message.trim()) {  // Only emit if there is a valid message
+                socket.emit('user-message', message);
+                messageInput.value = '';  // Clear the input field
+            }
+        });
     </script>
 </body>
 </html>

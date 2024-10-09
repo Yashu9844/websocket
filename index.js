@@ -17,7 +17,7 @@ app.get('/' , (req,res)=>{
 
 io.on('connection',(socket)=>{
    socket.on('user-message',(messy)=>{
-    io.emit("message",messy)
+    socket.broadcast.emit("message",messy)
    })
 })
 
