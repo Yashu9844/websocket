@@ -7,27 +7,47 @@
 </head>
 <body>
     <h1>Hello, This is a chat app</h1>
+    
+    <!-- Room input -->
+    <input type="text" placeholder="Enter room name" id="room">
+    <button id="roombtn">Join Room</button>
+
+    <!-- Message input -->
     <input type="text" placeholder="Enter the message" id="mes">
-    <button id="btn">Send</button>
+    <button id="btn">Send Message</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         const messageInput = document.getElementById('mes');
-        const button = document.getElementById('btn');
+        const roomInput = document.getElementById('room');
+        const sendMessageButton = document.getElementById('btn');
+        const joinRoomButton = document.getElementById('roombtn');
+        let currentRoom = '';  // Store the current room
 
-        // Receive messages from other clients and display them
+        // Listen for messages from the server
         socket.on('message', (message) => {
             const p = document.createElement('p');
             p.textContent = message;
             document.body.appendChild(p);
         });
 
-        // Send the message to the server when the button is clicked
-        button.addEventListener('click', () => {
+        // Join the room when the "Join Room" button is clicked
+        joinRoomButton.addEventListener('click', () => {
+            const room = roomInput.value;
+            if (room.trim()) {
+                currentRoom = room;
+                socket.emit('join-room', room);
+                console.log(`Joined room: ${room}`);
+                roomInput.value = ' '
+            }
+        });
+
+        // Send a message to the current room
+        sendMessageButton.addEventListener('click', () => {
             const message = messageInput.value;
-            if (message.trim()) {  // Only emit if there is a valid message
-                socket.emit('user-message', message);
+            if (message.trim() && currentRoom) {
+                socket.emit('user-message', { message, room: currentRoom });
                 messageInput.value = '';  // Clear the input field
             }
         });

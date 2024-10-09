@@ -1,24 +1,33 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const socketIo  = require('socket.io');
-
+const socketIo = require('socket.io');
 
 const server = http.createServer(app);
+const io = socketIo(server);
 
-const io = socketIo(server)
-
-// app.use(express.static('public'));
-
-app.get('/' , (req,res)=>{
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
-})
+});
 
+io.on('connection', (socket) => {
+    console.log('A user connected');
 
-io.on('connection',(socket)=>{
-   socket.on('user-message',(messy)=>{
-    socket.broadcast.emit("message",messy)
-   })
-})
+    // Handling room joining
+    socket.on('join-room', (room) => {
+        socket.join(room);
+        console.log(`User joined room: ${room}`);
+    });
+
+    // Handling messages sent to a specific room
+    socket.on('user-message', ({ message, room }) => {
+        // Send the message to everyone in the room except the sender
+        socket.to(room).emit('message', message);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
 
 server.listen(3000, () => console.log('Server running on port 3000'));
